@@ -70,14 +70,14 @@ FDMの層間、壁、反り、パッキン面から漏れる可能性がある�
 水密・真空容器・圧力容器としては設計していない。
 
 ファイル
-case_standing.step：脚を下にして立てた、ふたを閉じた組み立て状態。
-case_assembly.step：設計座標でふたを閉じた組み立て状態。
-body.step / lid.step：個別の編集用CAD。lid.stepはロック前の角度。
-body.stl / lid.stl：個別の造形用モデル。
+cad/case_standing.step：脚を下にして立てた、ふたを閉じた組み立て状態。
+cad/case_assembly.step：設計座標でふたを閉じた組み立て状態。
+cad/body.step / cad/lid.step：個別の編集用CAD。lid.stepはロック前の角度。
+stl/body.stl / stl/lid.stl：個別の造形用モデル。
 filament_case.py：build123d 0.13.0の設計スクリプト。
 requirements.txt：CAD生成の依存ライブラリ。
 validation.json：形状・回転経路の代表位置・重心・STLの確認結果。
-preview.png：形状の確認用画像。
+images/preview.png：形状の確認用画像。
 
 3Dプレビュー
 本体・ふたは実際のCADから生成。スプールは参考形状。

@@ -9,6 +9,8 @@ from build123d import (Align, Box, Cylinder, Cone, Pos, Rot, Solid, Plane, Wire,
                       Compound, Color, CenterOf, export_step, export_stl)
 
 OUT=Path(__file__).resolve().parent
+CAD=OUT/'cad'
+STL=OUT/'stl'
 P=dict(spool_diameter=200.0,spool_width=67.0,spool_bore_assumed=55.0,
        cavity_radius=101.5,wall=2.8,floor=2.4,support_height=1.6,
        body_height=74.0,rim_radius=106.5,rim_bottom=66.0,ramp_bottom=63.8,
@@ -94,6 +96,8 @@ def overlap(a,b):
     return abs(inter.volume) if hasattr(inter,'volume') else sum(abs(s.volume) for s in inter)
 
 def main():
+    CAD.mkdir(parents=True,exist_ok=True)
+    STL.mkdir(parents=True,exist_ok=True)
     body,lid,spool=make_parts()
     closed=Pos(0,0,P['closed_lift'])*Rot(0,0,-P['lock_angle'])*lid
     report={'version':2,'parameters_mm':P,'prototype':True,'parts':{}}
@@ -102,9 +106,9 @@ def main():
         size=part.bounding_box().size
         report['parts'][name]=dict(valid=part.is_valid,solids=len(part.solids()),bounds_mm=[round(size.X,3),round(size.Y,3),round(size.Z,3)],volume_cm3=round(part.volume/1000,2))
         assert max(size.X,size.Y,size.Z)<=256
-        export_step(part,OUT/f'{name}.step')
+        export_step(part,CAD/f'{name}.step')
         printable=part if name=='body' else Pos(0,0,P['body_height']+P['lid_thickness'])*Rot(180,0,0)*part
-        export_stl(printable,OUT/f'{name}.stl',tolerance=0.04,angular_tolerance=0.15)
+        export_stl(printable,STL/f'{name}.stl',tolerance=0.04,angular_tolerance=0.15)
     print('Checking lid/spool clearances and cam motion',flush=True)
     for name,a,b in [('body_lid',body,closed),('body_spool',body,spool),('lid_spool',closed,spool)]:
         vol=overlap(a,b);report[name+'_interference_mm3']=round(vol,6);assert vol<0.001,(name,vol)
@@ -130,11 +134,11 @@ def main():
         margin=min(44-abs(center[0]),center[2],80-center[2])
         assert margin>0
         report['static_balance'][name]=dict(center_cad_mm=[round(v,3) for v in center],support_margin_mm=round(margin,3))
-    export_step(Compound(children=[body,closed]),OUT/'case_assembly.step')
+    export_step(Compound(children=[body,closed]),CAD/'case_assembly.step')
     standing=Pos(0,40,113)*Rot(90,0,0)
-    export_step(Compound(children=[standing*body,standing*closed]),OUT/'case_standing.step')
+    export_step(Compound(children=[standing*body,standing*closed]),CAD/'case_standing.step')
     (OUT/'validation.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
-    work=OUT.parents[1]/'work';work.mkdir(exist_ok=True)
+    work=OUT.parent/'work'/'filament-drybox';work.mkdir(parents=True,exist_ok=True)
     (work/'case_meshes_v2.json').write_text(json.dumps(dict(body=mesh_json(body),lid=mesh_json(lid),parameters=P),separators=(',',':')),encoding='utf-8')
     print(json.dumps(report,indent=2),flush=True)
 
