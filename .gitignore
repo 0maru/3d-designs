@@ -1,0 +1,19 @@
+# Local Python environment and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Scratch exports and working files
+work/
+tmp/
+*.tmp
+*.bak
+
+# Operating system metadata
+.DS_Store
+Thumbs.db
+desktop.ini
